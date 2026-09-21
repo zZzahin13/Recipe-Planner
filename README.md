@@ -67,17 +67,45 @@ each `ui/*View` class is a natural candidate to convert.
 - **Week 3 (JavaFX GUI):** `ui/` package -- `BorderPane`, `VBox`, `HBox`,
   `GridPane`, `TilePane`, `TextField`, `Button`, `ListView`, `ImageView`,
   CSS in `style.css`, `setOnAction` event handlers throughout.
-- **Week 4 (Concurrency):** `network/FetchRecipesTask` (extends
-  `Task<List<Recipe>>`, submitted to an `ExecutorService` in
-  `SearchView`) and `network/CookingTimerService` (extends
-  `Service<Void>`), both updating the UI only via `Platform.runLater`
-  or JavaFX's Task callback threading guarantees.
+- **Week 4 (Concurrency):** `network/MultiSourceSearchTask` and
+  `network/ParallelCategorySearchTask` (both `Task<List<Recipe>>`
+  submitted to an `ExecutorService` in `SearchView`), and
+  `network/TimerManager` (`ScheduledExecutorService` driving any number
+  of concurrent `CookingTimer`s) -- all updating the UI only via
+  `Platform.runLater` or JavaFX's Task callback threading guarantees.
 - **Week 6 (SQLite/JDBC):** `db/DatabaseManager` + `dao/` package --
   schema creation, parameterized `PreparedStatement` CRUD, results
   mapped into POJOs for `ListView`/`ComboBox`.
 - **Week 7 (JSON/API):** `network/MealDbApiService` -- `HttpClient` GET
   requests to TheMealDB, `org.json` parsing of the flattened
   `strIngredient1..20` fields into `Ingredient` objects.
+
+## Feature additions (round 2)
+
+- **Multi-source search / parallel categories** -- `SearchView` now
+  either checks your local library first and falls back to TheMealDB
+  only if nothing matches (`MultiSourceSearchTask`), or fires several
+  category searches at once via an `ExecutorService`
+  (`ParallelCategorySearchTask`) when you multi-select categories.
+- **Nutrition chart** -- `ui/NutritionChartView` (a `PieChart`) shows
+  calories/protein/carbs/fat for a recipe. **TheMealDB has no
+  nutrition fields in its API**, so this is never auto-fetched --
+  enter it in `CustomRecipeView` when creating a recipe, or via the
+  "Edit Nutrition" button on any recipe's detail screen. Values scale
+  with the servings spinner.
+- **Portion/servings scaler** -- the "Servings" spinner on the detail
+  screen rescales ingredient quantities (`util/QuantityScaler`) and
+  the nutrition chart together. Only quantities that start with a
+  number get scaled; free-text ones like "a pinch" are left alone and
+  marked "(not auto-scaled)".
+- **Multi-step timers with sound** -- `network/TimerManager` +
+  `ui/TimerPanelView` replace the old single-timer widget. Start as
+  many named timers as you want; each beeps (system beep, not an
+  embedded audio file) and pops a non-blocking alert when it finishes,
+  independently of the others.
+- **Cook Mode** -- `ui/CookModeView` opens a fullscreen, one-step-at-a-
+  time view (Space/Right = next, Left = back, Enter = mark done, Esc =
+  exit) from the "Enter Cook Mode" button on the detail screen.
 
 ## Known gaps / things to decide next
 

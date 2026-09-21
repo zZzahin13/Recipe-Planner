@@ -1,1 +1,7 @@
-``` target/ *.class *.db .idea/ *.iml .vscode/ .DS_Store ```
+target/
+*.class
+*.db
+.idea/
+*.iml
+.vscode/
+.DS_Store
