@@ -17,6 +17,7 @@ public class MainView extends BorderPane {
     private final VBox navBar = new VBox(8);
     private final RecipeDetailView detailView = new RecipeDetailView();
 
+    private HomeView homeView;
     private SearchView searchView;
     private FavoritesView favoritesView;
     private MealPlannerView mealPlannerView;
@@ -25,7 +26,7 @@ public class MainView extends BorderPane {
     public MainView() {
         buildNav();
         setLeft(navBar);
-        showSearch(); // default screen
+        showHome(); // default screen
     }
 
     private void buildNav() {
@@ -36,12 +37,13 @@ public class MainView extends BorderPane {
         Label appTitle = new Label("Recipe Planner");
         appTitle.getStyleClass().add("app-title");
 
+        Button homeBtn = navButton("Home", this::showHome);
         Button searchBtn = navButton("Search", this::showSearch);
         Button favoritesBtn = navButton("Favorites", this::showFavorites);
         Button plannerBtn = navButton("Meal Planner", this::showMealPlanner);
         Button customBtn = navButton("My Recipes", this::showCustomRecipe);
 
-        navBar.getChildren().addAll(appTitle, searchBtn, favoritesBtn, plannerBtn, customBtn);
+        navBar.getChildren().addAll(appTitle, homeBtn, searchBtn, favoritesBtn, plannerBtn, customBtn);
     }
 
     private Button navButton(String text, Runnable action) {
@@ -57,6 +59,15 @@ public class MainView extends BorderPane {
     // Navigation -- each screen gets a callback into showDetail so it
     // can hand off to the shared RecipeDetailView.
     // ---------------------------------------------------------------
+
+    private void showHome() {
+        if (homeView == null) {
+            homeView = new HomeView(this::showSearch, this::showFavorites, this::showMealPlanner,
+                    this::showCustomRecipe, this::showDetail);
+        }
+        homeView.refresh();
+        setCenter(homeView);
+    }
 
     private void showSearch() {
         if (searchView == null) {

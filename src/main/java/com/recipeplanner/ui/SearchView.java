@@ -1,6 +1,7 @@
 package com.recipeplanner.ui;
 
 import com.recipeplanner.model.Recipe;
+import com.recipeplanner.network.MealDbApiService;
 import com.recipeplanner.network.MultiSourceSearchTask;
 import com.recipeplanner.network.ParallelCategorySearchTask;
 import javafx.concurrent.Task;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
-import com.recipeplanner.network.MealDbApiService;
+
 /**
  * Recipe search screen. Two ways to search, both off the UI thread:
  *
@@ -37,6 +38,7 @@ public class SearchView extends BorderPane {
         t.setDaemon(true);
         return t;
     });
+    private final MealDbApiService api = new MealDbApiService();
 
     private final TextField keywordField = new TextField();
     private final ListView<String> categoryList = new ListView<>();
@@ -53,32 +55,41 @@ public class SearchView extends BorderPane {
         setTop(buildSearchBar());
         setCenter(buildResultsArea());
     }
-    /** Category results only have title + image, so load the full recipe when a card is clicked. */
-    private void openRecipe(Recipe recipe, Consumer<Recipe> open) {
-        boolean needsDetails = recipe.getApiId() != null
-                && recipe.getRecipeId() == 0
-                && recipe.getIngredients().isEmpty();
-        if (!needsDetails) {
-            open.accept(recipe);
+
+    /**
+     * Category-search results are lightweight "cards" (title/image/id only
+     * -- see MealDbApiService.searchByCategory) to avoid one HTTP request
+     * per result. If the clicked recipe has no ingredients loaded yet, this
+     * fetches full detail from TheMealDB first, off the UI thread, before
+     * handing off to the real callback. Keyword-search and local-library
+     * results already have full data and open immediately.
+     */
+    private void openRecipe(Recipe card, Consumer<Recipe> onFullyLoaded) {
+        boolean needsFullDetail = card.getIngredients().isEmpty() && card.getApiId() != null;
+        if (!needsFullDetail) {
+            onFullyLoaded.accept(card);
             return;
         }
 
-        statusLabel.setText("Loading recipe...");
-        Task<Recipe> task = new Task<>() {
+        statusLabel.setText("Loading \"" + card.getTitle() + "\"...");
+        Task<Recipe> loadTask = new Task<>() {
             @Override
             protected Recipe call() throws Exception {
-                return new MealDbApiService().getById(recipe.getApiId());
+                return api.getById(card.getApiId());
             }
         };
-        task.setOnSucceeded(e -> {
-            Recipe full = task.getValue();
+        loadTask.setOnSucceeded(e -> {
+            Recipe full = loadTask.getValue();
             statusLabel.setText("");
-            open.accept(full != null ? full : recipe);
+            onFullyLoaded.accept(full != null ? full : card);
         });
-        task.setOnFailed(e -> statusLabel.setText(
-                "Could not load recipe: " + task.getException().getMessage()));
-        executor.submit(task);
+        loadTask.setOnFailed(e -> {
+            Throwable ex = loadTask.getException();
+            statusLabel.setText("Could not load full recipe: " + (ex != null ? ex.getMessage() : "unknown error"));
+        });
+        executor.submit(loadTask);
     }
+
     private VBox buildSearchBar() {
         keywordField.setPromptText("Search by recipe name (e.g. \"chicken curry\")...");
         keywordField.setPrefWidth(320);
@@ -98,6 +109,7 @@ public class SearchView extends BorderPane {
         progress.setPrefSize(24, 24);
 
         HBox keywordRow = new HBox(10, keywordField, searchButton, progress);
+
         Button clearCategoriesBtn = new Button("Clear categories");
         clearCategoriesBtn.setOnAction(e -> categoryList.getSelectionModel().clearSelection());
         HBox categoryRow = new HBox(10, categoryList, clearCategoriesBtn);

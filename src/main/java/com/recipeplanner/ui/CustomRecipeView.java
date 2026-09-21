@@ -246,7 +246,7 @@ public class CustomRecipeView extends BorderPane {
 
         try {
             recipeDAO.saveRecipe(recipe);
-            editingRecipe = recipe;
+            editingRecipe = recipe; // subsequent Save presses now update this row instead of inserting again
             statusLabel.setText("Saved.");
             loadMyRecipes();
             if (onSaved != null) {
