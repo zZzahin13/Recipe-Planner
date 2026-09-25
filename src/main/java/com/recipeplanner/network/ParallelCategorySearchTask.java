@@ -3,12 +3,13 @@ package com.recipeplanner.network;
 import com.recipeplanner.model.Recipe;
 import javafx.concurrent.Task;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.io.IOException;
+
 /**
  * Searches several TheMealDB categories at once (e.g. "Vegetarian" +
  * "Dessert" + "Seafood" all in parallel) instead of one at a time, using
@@ -47,26 +48,32 @@ public class ParallelCategorySearchTask extends Task<List<Recipe>> {
 
             // De-duplicate by apiId in case the same recipe appears under multiple categories.
             Map<String, Recipe> merged = new LinkedHashMap<>();
-            List<String> failed = new ArrayList<>();
-            String lastError = "";
+            Map<String, String> failures = new LinkedHashMap<>();
             for (Map.Entry<String, Future<List<Recipe>>> entry : futures.entrySet()) {
                 try {
                     for (Recipe recipe : entry.getValue().get(30, TimeUnit.SECONDS)) {
                         merged.putIfAbsent(recipe.getApiId(), recipe);
                     }
-                } catch (ExecutionException e) {
-                    failed.add(entry.getKey());
-                    lastError = String.valueOf(e.getCause());
-                } catch (TimeoutException e) {
-                    failed.add(entry.getKey());
-                    lastError = "timed out";
+                } catch (ExecutionException | TimeoutException e) {
+                    // One category failing (timeout, bad response) shouldn't sink the whole
+                    // search if others succeeded -- but silently returning an empty result
+                    // when EVERY category fails just looks like "no recipes found", which is
+                    // misleading. Track failures and only surface them if nothing came back.
+                    Throwable cause = (e instanceof ExecutionException) ? e.getCause() : e;
+                    failures.put(entry.getKey(), cause != null ? cause.getMessage() : e.getMessage());
                 }
             }
-            if (merged.isEmpty() && !failed.isEmpty()) {
-                throw new IOException("Could not load " + String.join(", ", failed) + ": " + lastError);
+
+            if (merged.isEmpty() && !failures.isEmpty()) {
+                String detail = failures.entrySet().stream()
+                        .map(f -> f.getKey() + ": " + f.getValue())
+                        .reduce((a, b) -> a + "; " + b)
+                        .orElse("unknown error");
+                throw new IOException("All category searches failed -- " + detail);
             }
 
-            updateMessage("Found " + merged.size() + " recipe(s) across " + categories.size() + " categories");
+            updateMessage("Found " + merged.size() + " recipe(s) across " + categories.size() + " categories"
+                    + (failures.isEmpty() ? "" : " (" + failures.size() + " category/categories failed)"));
             return new ArrayList<>(merged.values());
         } finally {
             pool.shutdown();

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.TilePane?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.recipeplanner.controller.HomeController" fitToWidth="true">
+    <content>
+        <VBox spacing="24">
+            <padding>
+                <Insets top="24" right="24" bottom="24" left="24"/>
+            </padding>
+
+            <VBox spacing="4">
+                <Label text="Welcome to Recipe Planner" styleClass="screen-heading"/>
+                <Label text="Search for recipes, build your library, and plan your week." styleClass="status-label"/>
+            </VBox>
+
+            <HBox spacing="20">
+                <VBox alignment="CENTER" styleClass="recipe-card">
+                    <padding>
+                        <Insets top="16" right="28" bottom="16" left="28"/>
+                    </padding>
+                    <Label fx:id="recipeCountLabel" styleClass="card-title" style="-fx-font-size: 30px;"/>
+                    <Label text="Saved Recipes" styleClass="card-subtitle"/>
+                </VBox>
+                <VBox alignment="CENTER" styleClass="recipe-card">
+                    <padding>
+                        <Insets top="16" right="28" bottom="16" left="28"/>
+                    </padding>
+                    <Label fx:id="plannedMealsLabel" styleClass="card-title" style="-fx-font-size: 30px;"/>
+                    <Label text="Meals Planned This Week" styleClass="card-subtitle"/>
+                </VBox>
+            </HBox>
+
+            <HBox spacing="12">
+                <Button text="Search Recipes" styleClass="primary-button" onAction="#onGoSearch"/>
+                <Button text="My Library" styleClass="primary-button" onAction="#onGoFavorites"/>
+                <Button text="Meal Planner" styleClass="primary-button" onAction="#onGoPlanner"/>
+                <Button text="Create a Recipe" styleClass="primary-button" onAction="#onGoCustom"/>
+            </HBox>
+
+            <VBox spacing="8">
+                <Label text="Recently Added"/>
+                <Label fx:id="recentHint" styleClass="status-label" wrapText="true"/>
+                <TilePane fx:id="recentPane" hgap="14" vgap="14" prefColumns="4"/>
+            </VBox>
+        </VBox>
+    </content>
+</ScrollPane>

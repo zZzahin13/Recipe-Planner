@@ -28,17 +28,20 @@ public class RecipeDAO {
     // ---------------------------------------------------------------
 
     /**
-     * Inserts a recipe and its ingredients. If a recipe with the same
-     * api_id already exists, its row (and ingredient links) are reused
-     * and updated instead of creating a duplicate.
+     * Inserts a recipe and its ingredients. If this Recipe object already
+     * has a database id (recipeId > 0 -- i.e. it was loaded from the DB,
+     * such as when editing an existing custom recipe), that row is
+     * updated directly. Otherwise, for API-sourced recipes with no known
+     * database id yet, falls back to looking the row up by api_id so
+     * favoriting the same TheMealDB recipe twice doesn't create a
+     * duplicate. Without the recipeId check first, editing a custom
+     * recipe (which has no api_id at all) always fell through to INSERT
+     * and created a new copy on every save.
      */
     public int saveRecipe(Recipe recipe) throws SQLException {
-        Integer existingId = null;
-        if (recipe.getRecipeId() > 0) {
-            existingId = recipe.getRecipeId();                 // already in the database -> update it
-        } else if (recipe.getApiId() != null) {
-            existingId = findIdByApiId(recipe.getApiId());     // came from TheMealDB -> match by api id
-        }
+        Integer existingId = recipe.getRecipeId() > 0
+                ? Integer.valueOf(recipe.getRecipeId())
+                : (recipe.getApiId() != null ? findIdByApiId(recipe.getApiId()) : null);
 
         String sql = (existingId != null)
                 ? "UPDATE recipes SET title=?, category=?, instructions=?, image_url=?, " +

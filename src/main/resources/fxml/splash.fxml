@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Purely static content, so this file has no fx:controller;
+     there's nothing for a controller to do. Main.java loads it,
+     shows it for a short pause, then swaps in main.fxml. -->
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      alignment="CENTER" spacing="16" prefWidth="480" prefHeight="320"
+      style="-fx-background-color: linear-gradient(to bottom right, #2E3B2E, #465946);">
+    <padding>
+        <Insets top="40" right="40" bottom="40" left="40"/>
+    </padding>
+    <Label text="Recipe Planner" textFill="WHITE" style="-fx-font-size: 40px; -fx-font-weight: bold;"/>
+    <Label text="Search, save, and plan your meals in one place" textFill="#D8E6D8" style="-fx-font-size: 15px;"/>
+    <ProgressIndicator prefWidth="36" prefHeight="36" style="-fx-progress-color: white;"/>
+</VBox>

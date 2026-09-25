@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.TilePane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.recipeplanner.controller.FavoritesController">
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16"/>
+    </padding>
+    <top>
+        <VBox spacing="6">
+            <Label text="My Recipe Library" styleClass="screen-heading"/>
+            <Label fx:id="statusLabel" styleClass="status-label"/>
+        </VBox>
+    </top>
+    <center>
+        <ScrollPane fitToWidth="true">
+            <content>
+                <TilePane fx:id="grid" hgap="14" vgap="14" prefColumns="4"/>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

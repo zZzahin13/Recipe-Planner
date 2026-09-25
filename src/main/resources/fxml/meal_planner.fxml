@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+  The GridPane below is intentionally empty in the FXML: its headers and
+  per-day/meal-slot ComboBox cells are inherently dynamic (7 days x 4
+  meal types, wired to the database), so MealPlannerController builds
+  them at runtime the same way a cell factory populates a ListView.
+  Scene Builder has nothing meaningful to lay out for repeated,
+  data-driven cells like this.
+-->
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.recipeplanner.controller.MealPlannerController">
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16"/>
+    </padding>
+    <top>
+        <VBox>
+            <HBox spacing="12">
+                <padding>
+                    <Insets bottom="12"/>
+                </padding>
+                <Label text="Weekly Meal Planner" styleClass="screen-heading"/>
+                <Button text="Generate Shopping List" styleClass="primary-button" onAction="#onShoppingList"/>
+            </HBox>
+            <Label fx:id="statusLabel" styleClass="status-label"/>
+        </VBox>
+    </top>
+    <center>
+        <ScrollPane>
+            <content>
+                <GridPane fx:id="grid" hgap="8" vgap="8"/>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

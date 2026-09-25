@@ -8,7 +8,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 
 /** Builds the clickable recipe thumbnail card shown in grid/tile layouts. */
-final class RecipeCardFactory {
+public final class RecipeCardFactory {
 
     private static final double CARD_WIDTH = 220;
     private static final double IMAGE_HEIGHT = 140;
@@ -16,7 +16,7 @@ final class RecipeCardFactory {
     private RecipeCardFactory() {
     }
 
-    static VBox create(Recipe recipe, Runnable onClick) {
+    public static VBox create(Recipe recipe, Runnable onClick) {
         ImageView imageView = new ImageView();
         imageView.setFitWidth(CARD_WIDTH - 20);
         imageView.setFitHeight(IMAGE_HEIGHT);

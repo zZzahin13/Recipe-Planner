@@ -38,47 +38,32 @@ public class MealDbApiService {
         return parseMealsResponse(fetch(url));
     }
 
-    /** Search recipes by category (e.g. "Seafood", "Dessert", "Vegetarian"). */
-//    public List<Recipe> searchByCategory(String category) throws IOException, InterruptedException {
-//        // filter.php only returns id/title/thumbnail, so we fetch full details per result.
-//        String url = BASE_URL + "/filter.php?c=" + encode(category);
-//        String json = fetch(url);
-//        JSONObject root = new JSONObject(json);
-//        JSONArray meals = root.optJSONArray("meals");
-//        List<Recipe> results = new ArrayList<>();
-//        if (meals == null) {
-//            return results;
-//        }
-//        for (int i = 0; i < meals.length(); i++) {
-//            String id = meals.getJSONObject(i).optString("idMeal", null);
-//            if (id != null) {
-//                Recipe full = getById(id);
-//                if (full != null) {
-//                    results.add(full);
-//                }
-//            }
-//        }
-//        return results;
-//    }
+    /**
+     * Search recipes by category (e.g. "Seafood", "Dessert", "Vegetarian").
+     * filter.php only returns id/title/thumbnail -- NOT full ingredients or
+     * instructions. This used to fetch full detail per result via getById(),
+     * which meant one extra HTTP request per recipe and made category
+     * searches slow enough to time out. Instead this returns lightweight
+     * "card" Recipe objects (title/image/id only); the UI fetches full
+     * detail lazily, only for the one recipe actually clicked open.
+     */
     public List<Recipe> searchByCategory(String category) throws IOException, InterruptedException {
-        // One fast request: filter.php returns id + title + thumbnail only.
-        // Full details are loaded later, when the user clicks a card.
         String url = BASE_URL + "/filter.php?c=" + encode(category);
-        JSONObject root = new JSONObject(fetch(url));
+        String json = fetch(url);
+        JSONObject root = new JSONObject(json);
         JSONArray meals = root.optJSONArray("meals");
         List<Recipe> results = new ArrayList<>();
         if (meals == null) {
             return results;
         }
         for (int i = 0; i < meals.length(); i++) {
-            JSONObject m = meals.getJSONObject(i);
-            Recipe r = new Recipe();
-            r.setApiId(m.optString("idMeal", null));
-            r.setTitle(m.optString("strMeal", "Untitled"));
-            r.setImageUrl(m.optString("strMealThumb", null));
-            r.setCategory(category);
-            r.setInstructions("");
-            results.add(r);
+            JSONObject mealJson = meals.getJSONObject(i);
+            Recipe card = new Recipe();
+            card.setApiId(mealJson.optString("idMeal", null));
+            card.setTitle(mealJson.optString("strMeal", "Untitled"));
+            card.setImageUrl(mealJson.optString("strMealThumb", null));
+            card.setCategory(category);
+            results.add(card);
         }
         return results;
     }

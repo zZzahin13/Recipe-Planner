@@ -39,24 +39,38 @@ worth knowing if you ever need to hand someone a double-clickable app.
 
 ```
 src/main/java/com/recipeplanner/
-  Main.java                 application entry point
-  model/                    Recipe, Ingredient, MealPlanEntry (POJOs)
+  Main.java                 loads splash.fxml, then main.fxml
+  model/                    Recipe, Ingredient, MealPlanEntry, CookingTimer (POJOs)
   db/                       DatabaseManager -- JDBC connection + schema init
   dao/                      RecipeDAO, MealPlanDAO -- all SQL lives here
-  network/                  MealDbApiService (HTTP+JSON), FetchRecipesTask,
-                             CookingTimerService (background Task/Service)
-  ui/                       MainView (shell/nav) + one class per screen
+  network/                  MealDbApiService (HTTP+JSON), search tasks, TimerManager
+  controller/                MainController + one @FXML controller per screen
+  ui/                       small reusable widgets embedded INTO screens (see below)
 src/main/resources/
   css/style.css
   sql/schema.sql
+  fxml/                     one .fxml layout per screen -- open these in Scene Builder
 ```
 
-This is a plain MVC-ish split rather than FXML-based MVC: `ui/` classes
-build their own JavaFX node trees in code and wire up event handlers
-directly, so there's no separate `.fxml` + `@FXML`-annotated controller
-per screen. Functionally equivalent for this app's size; if you want to
-practice the FXML+Controller pattern specifically for the syllabus,
-each `ui/*View` class is a natural candidate to convert.
+Every screen is a `.fxml` file (editable visually in Scene Builder) paired
+with a `controller/*Controller.java` class using `@FXML`-annotated fields
+and `onAction="#methodName"` handlers -- standard FXML+Controller MVC.
+`MainController` loads each screen's FXML on demand via `FXMLLoader` and
+swaps it into `main.fxml`'s content area, caching both the built `Parent`
+and its controller so switching screens doesn't re-hit the database every
+time. Any controller that needs to navigate elsewhere implements
+`MainAware`, which hands it a reference to `MainController`.
+
+Four things stayed as plain Java classes in `ui/` instead of becoming
+FXML, because they're either dynamically repeated content or a separate
+popup window, not a fixed layout Scene Builder could meaningfully design:
+`RecipeCardFactory` (builds one recipe thumbnail card at a time, called
+in a loop -- like a ListView cell factory), `TimerPanelView` and
+`NutritionChartView` (rebuilt/rebound every time data changes, embedded
+into an empty `VBox` placeholder in `recipe_detail.fxml`), and
+`CookModeView` (opens its own fullscreen `Stage`, not a screen swapped
+into `main.fxml`). This is a normal hybrid pattern in real FXML-based
+JavaFX apps, not a shortcut around the Scene Builder requirement.
 
 ## Where each lab concept lives
 
@@ -64,9 +78,11 @@ each `ui/*View` class is a natural candidate to convert.
   constructors and getters/setters; try-catch around all JDBC and
   network calls.
 - **Week 2 (Git):** see "Suggested Git workflow" below.
-- **Week 3 (JavaFX GUI):** `ui/` package -- `BorderPane`, `VBox`, `HBox`,
+- **Week 3 (JavaFX GUI):** `resources/fxml/*.fxml` (open in Scene
+  Builder) + `controller/*Controller.java` (`@FXML` fields,
+  `onAction="#method"` handlers) -- `BorderPane`, `VBox`, `HBox`,
   `GridPane`, `TilePane`, `TextField`, `Button`, `ListView`, `ImageView`,
-  CSS in `style.css`, `setOnAction` event handlers throughout.
+  CSS in `style.css`.
 - **Week 4 (Concurrency):** `network/MultiSourceSearchTask` and
   `network/ParallelCategorySearchTask` (both `Task<List<Recipe>>`
   submitted to an `ExecutorService` in `SearchView`), and

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.recipeplanner.controller.CustomRecipeController">
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16"/>
+    </padding>
+    <left>
+        <VBox spacing="8">
+            <padding>
+                <Insets right="16"/>
+            </padding>
+            <Label text="My Custom Recipes" styleClass="card-title"/>
+            <ListView fx:id="myRecipesList" prefWidth="220" prefHeight="500"/>
+            <Button text="+ New Recipe" maxWidth="Infinity" onAction="#onNewRecipe"/>
+            <Button text="Delete Selected" maxWidth="Infinity" styleClass="danger-button" onAction="#onDeleteSelected"/>
+        </VBox>
+    </left>
+    <center>
+        <ScrollPane fitToWidth="true">
+            <content>
+                <VBox spacing="14">
+                    <padding>
+                        <Insets left="16"/>
+                    </padding>
+
+                    <Label text="Recipe Details"/>
+                    <GridPane hgap="10" vgap="10">
+                        <Label text="Title:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <TextField fx:id="titleField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                        <Label text="Category:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <TextField fx:id="categoryField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                        <Label text="Prep time (minutes):" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <Spinner fx:id="prepTimeSpinner" editable="true" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                        <Label text="Base servings:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                        <Spinner fx:id="baseServingsSpinner" editable="true" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                    </GridPane>
+
+                    <Label text="Nutrition (per full recipe, at base servings)"/>
+                    <Label text="Optional -- powers the Nutrition chart and scales with servings. Leave at 0 if unknown."
+                           styleClass="status-label" wrapText="true"/>
+                    <GridPane hgap="10" vgap="10">
+                        <Label text="Calories (kcal):" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <Spinner fx:id="caloriesSpinner" editable="true" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                        <Label text="Protein (g):" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <Spinner fx:id="proteinSpinner" editable="true" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                        <Label text="Carbs (g):" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <Spinner fx:id="carbsSpinner" editable="true" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                        <Label text="Fat (g):" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                        <Spinner fx:id="fatSpinner" editable="true" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                    </GridPane>
+
+                    <Label text="Ingredients"/>
+                    <VBox fx:id="ingredientRows" spacing="6"/>
+                    <Button text="+ Add Ingredient" onAction="#onAddIngredient"/>
+
+                    <Label text="Instructions"/>
+                    <TextArea fx:id="instructionsArea" wrapText="true" prefHeight="160"/>
+
+                    <Button text="Save Recipe" styleClass="primary-button" onAction="#onSave"/>
+                    <Label fx:id="statusLabel" styleClass="status-label"/>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>
