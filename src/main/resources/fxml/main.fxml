@@ -20,7 +20,7 @@
             <padding>
                 <Insets top="16" right="16" bottom="16" left="16"/>
             </padding>
-            <Label text="Recipe Planner" styleClass="app-title"/>
+            <Label text="Recipe Planner" styleClass="app-title" wrapText="true" maxWidth="Infinity"/>
             <Button text="Home" maxWidth="Infinity" styleClass="nav-button" onAction="#showHome"/>
             <Button text="Search" maxWidth="Infinity" styleClass="nav-button" onAction="#showSearch"/>
             <Button text="Favorites" maxWidth="Infinity" styleClass="nav-button" onAction="#showFavorites"/>
