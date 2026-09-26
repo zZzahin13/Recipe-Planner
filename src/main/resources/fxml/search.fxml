@@ -40,7 +40,7 @@
         <VBox spacing="4">
             <Label fx:id="statusLabel" styleClass="status-label"/>
             <Label fx:id="sourceLabel" styleClass="status-label"/>
-            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
+            <ScrollPane fx:id="resultsScroll" fitToWidth="true" VBox.vgrow="ALWAYS">
                 <content>
                     <TilePane fx:id="resultsPane" hgap="14" vgap="14" prefColumns="4"/>
                 </content>

@@ -66,6 +66,14 @@
                     <VBox fx:id="nutritionContainer" />
                 </content>
             </TitledPane>
+            <TitledPane text="Micronutrients (USDA estimate)" collapsible="true">
+                <content>
+                    <VBox spacing="6">
+                        <Label fx:id="micronutrientStatusLabel" styleClass="status-label"/>
+                        <ListView fx:id="micronutrientList" prefHeight="160"/>
+                    </VBox>
+                </content>
+            </TitledPane>
 
             <TitledPane collapsible="false" text="Cooking Timers">
                 <content>

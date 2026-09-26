@@ -42,6 +42,7 @@ public class SearchController implements MainAware {
     @FXML private Label statusLabel;
     @FXML private Label sourceLabel;
     @FXML private TilePane resultsPane;
+    @FXML private ScrollPane resultsScroll;
 
     @Override
     public void setMainController(MainController mainController) {
@@ -52,6 +53,7 @@ public class SearchController implements MainAware {
     private void initialize() {
         categoryList.getItems().addAll(CATEGORIES);
         categoryList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        resultsPane.prefWidthProperty().bind(resultsScroll.widthProperty());
     }
 
     @FXML

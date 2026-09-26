@@ -1,5 +1,9 @@
 package com.recipeplanner.controller;
-
+import com.recipeplanner.model.Micronutrient;
+import com.recipeplanner.network.NutritionApiService;
+import javafx.concurrent.Task;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import com.recipeplanner.dao.RecipeDAO;
 import com.recipeplanner.model.CookingTimer;
 import com.recipeplanner.model.Ingredient;
@@ -15,7 +19,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
+import com.recipeplanner.model.NutritionLookupResult;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -30,7 +34,12 @@ public class RecipeDetailController implements MainAware {
     private final RecipeDAO recipeDAO = new RecipeDAO();
     private final TimerManager timerManager = new TimerManager();
     private final NutritionChartView nutritionChartView = new NutritionChartView();
-
+    private final NutritionApiService nutritionApi = new NutritionApiService();
+    private final ExecutorService nutritionExecutor = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "nutrition-lookup-worker");
+        t.setDaemon(true);
+        return t;
+    });
     private MainController mainController;
     private Recipe currentRecipe;
 
@@ -44,7 +53,8 @@ public class RecipeDetailController implements MainAware {
     @FXML private TextArea instructionsArea;
     @FXML private VBox nutritionContainer;
     @FXML private VBox timerContainer;
-
+    @FXML private Label micronutrientStatusLabel;
+    @FXML private ListView<String> micronutrientList;
     @Override
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
@@ -58,8 +68,51 @@ public class RecipeDetailController implements MainAware {
         nutritionContainer.getChildren().add(nutritionChartView);
         timerContainer.getChildren().add(new TimerPanelView(timerManager));
         timerManager.setOnTimerFinished(this::showTimerFinishedAlert);
-    }
 
+        ingredientList.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                ingredientList.prefHeightProperty().bind(newScene.heightProperty().multiply(0.35));
+            }
+        });
+    }
+    private void loadNutritionFromApi(Recipe recipe) {
+        micronutrientList.getItems().clear();
+        micronutrientStatusLabel.setText("Looking up nutrition data...");
+
+        Task<NutritionLookupResult> task = new Task<>() {
+            @Override
+            protected NutritionLookupResult call() throws Exception {
+                return nutritionApi.lookup(recipe.getTitle());
+            }
+        };
+        task.setOnSucceeded(e -> {
+            NutritionLookupResult result = task.getValue();
+
+            // Only auto-fill macros if none were entered by hand -- never
+            // overwrite something the user typed via Edit Nutrition.
+            if (!recipe.hasNutritionData() && result.hasAnyMacros()) {
+                recipe.setCalories(result.getCalories());
+                recipe.setProteinGrams(result.getProteinGrams());
+                recipe.setCarbsGrams(result.getCarbsGrams());
+                recipe.setFatGrams(result.getFatGrams());
+                nutritionChartView.setRecipe(recipe, servingsSpinner.getValue());
+            }
+
+            List<Micronutrient> micros = result.getMicronutrients();
+            if (micros.isEmpty()) {
+                micronutrientStatusLabel.setText("No USDA match found for \"" + recipe.getTitle() + "\".");
+            } else {
+                micronutrientStatusLabel.setText("Estimated per 100g, closest USDA match for \"" + recipe.getTitle() + "\":");
+                for (Micronutrient m : micros) {
+                    micronutrientList.getItems().add(m.toString());
+                }
+            }
+        });
+        task.setOnFailed(e -> micronutrientStatusLabel.setText(
+                "Could not fetch nutrition data: " + task.getException().getMessage()));
+
+        nutritionExecutor.submit(task);
+    }
     public void setRecipe(Recipe recipe) {
         this.currentRecipe = recipe;
 
@@ -78,6 +131,7 @@ public class RecipeDetailController implements MainAware {
 
         updateFavoriteButtonLabel();
         refreshScaledDisplay();
+        loadNutritionFromApi(recipe);
     }
 
     private void refreshScaledDisplay() {
