@@ -13,7 +13,7 @@ import java.util.List;
  * the HTTP call happen inside call(), off the JavaFX Application
  * Thread, same as the plain FetchRecipesTask.
  */
-public class MultiSourceSearchTask extends Task<List<Recipe>> {
+public class MultiSourceSearchTask extends RecipeSearchTask {
 
     public enum SourceUsed { LOCAL, API }
 
@@ -38,14 +38,16 @@ public class MultiSourceSearchTask extends Task<List<Recipe>> {
         List<Recipe> local = recipeDAO.searchLocal(keyword);
         if (!local.isEmpty()) {
             sourceUsed = SourceUsed.LOCAL;
-            updateMessage("Found " + local.size() + " recipe(s) in your library");
+            reportFound(local, "in your library");
+            //updateMessage("Found " + local.size() + " recipe(s) in your library");
             return local;
         }
 
         updateMessage("Not in your library -- checking TheMealDB...");
         List<Recipe> remote = api.searchByName(keyword);
         sourceUsed = SourceUsed.API;
-        updateMessage("Found " + remote.size() + " recipe(s) on TheMealDB");
+        reportFound(remote, "on TheMealDB");
+        //updateMessage("Found " + remote.size() + " recipe(s) on TheMealDB");
         return remote;
     }
 }

@@ -17,7 +17,7 @@ import java.util.concurrent.*;
  * results once every category has responded. Still just one Task from
  * the JavaFX side -- the fan-out/fan-in happens inside call().
  */
-public class ParallelCategorySearchTask extends Task<List<Recipe>> {
+public class ParallelCategorySearchTask extends RecipeSearchTask {
 
     private final List<String> categories;
     private final MealDbApiService api = new MealDbApiService();
@@ -72,9 +72,13 @@ public class ParallelCategorySearchTask extends Task<List<Recipe>> {
                 throw new IOException("All category searches failed -- " + detail);
             }
 
-            updateMessage("Found " + merged.size() + " recipe(s) across " + categories.size() + " categories"
+//           // updateMessage("Found " + merged.size() + " recipe(s) across " + categories.size() + " categories"
+//                  //  + (failures.isEmpty() ? "" : " (" + failures.size() + " category/categories failed)"));
+//           // return new ArrayList<>(merged.values());
+            List<Recipe> resultList = new ArrayList<>(merged.values());
+            reportFound(resultList, "across " + categories.size() + " categories"
                     + (failures.isEmpty() ? "" : " (" + failures.size() + " category/categories failed)"));
-            return new ArrayList<>(merged.values());
+            return resultList;
         } finally {
             pool.shutdown();
         }

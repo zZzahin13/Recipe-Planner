@@ -13,11 +13,11 @@ import java.util.List;
  * back on the Application Thread. Controllers should never touch
  * JavaFX controls from inside call() -- only from onSucceeded/onFailed.
  */
-public class FetchRecipesTask extends Task<List<Recipe>> {
+public class FetchRecipesTask extends RecipeSearchTask {
 
     public enum Mode { NAME, CATEGORY, INGREDIENT }
 
-    private final MealDbApiService api = new MealDbApiService();
+   // private final MealDbApiService api = new MealDbApiService();
     private final Mode mode;
     private final String query;
 
@@ -34,7 +34,8 @@ public class FetchRecipesTask extends Task<List<Recipe>> {
             case CATEGORY -> api.searchByCategory(query);
             case INGREDIENT -> api.searchByIngredient(query);
         };
-        updateMessage("Found " + results.size() + " recipe(s)");
+        //updateMessage("Found " + results.size() + " recipe(s)");
+        reportFound(results, "on TheMealDB");
         return results;
     }
 }
