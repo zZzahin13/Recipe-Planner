@@ -1,5 +1,6 @@
 package com.recipeplanner.controller;
-
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.Priority;
 import com.recipeplanner.dao.MealPlanDAO;
 import com.recipeplanner.dao.RecipeDAO;
 import com.recipeplanner.model.MealPlanEntry;
@@ -41,6 +42,15 @@ public class MealPlannerController implements MainAware {
     }
 
     private void buildGridHeaders() {
+        ColumnConstraints labelCol = new ColumnConstraints();
+        labelCol.setPercentWidth(12);
+        grid.getColumnConstraints().add(labelCol);
+
+        for (int col = 0; col < DAYS.length; col++) {
+            ColumnConstraints dayCol = new ColumnConstraints();
+            dayCol.setPercentWidth(88.0 / DAYS.length);
+            grid.getColumnConstraints().add(dayCol);
+        }
         grid.add(new Label(""), 0, 0);
         for (int col = 0; col < DAYS.length; col++) {
             Label dayLabel = new Label(DAYS[col]);
@@ -98,7 +108,9 @@ public class MealPlannerController implements MainAware {
         if (combo == null) {
             combo = new ComboBox<>();
             combo.setPromptText("-- empty --");
-            combo.setPrefWidth(140);
+            combo.setPrefWidth(90);
+            combo.setMaxWidth(Double.MAX_VALUE);
+            GridPane.setHgrow(combo, Priority.ALWAYS);
             combo.setConverter(new javafx.util.StringConverter<Recipe>() {
                 @Override
                 public String toString(Recipe recipe) {

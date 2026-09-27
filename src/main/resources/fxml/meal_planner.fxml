@@ -35,7 +35,7 @@
         </VBox>
     </top>
     <center>
-        <ScrollPane>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
             <content>
                 <GridPane fx:id="grid" hgap="8" vgap="8"/>
             </content>
