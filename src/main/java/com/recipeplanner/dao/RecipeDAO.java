@@ -8,12 +8,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Data-access object for the recipes / ingredients / recipe_ingredients tables.
- * Every public method opens its own PreparedStatement against the shared
- * connection; callers are expected to invoke these off the JavaFX
- * Application Thread (see network.FetchRecipesTask / ui controllers using Task<T>).
- */
+
 public class RecipeDAO {
 
     private final Connection conn;
@@ -27,17 +22,6 @@ public class RecipeDAO {
     // favorites and for the custom recipe creator).
     // ---------------------------------------------------------------
 
-    /**
-     * Inserts a recipe and its ingredients. If this Recipe object already
-     * has a database id (recipeId > 0 -- i.e. it was loaded from the DB,
-     * such as when editing an existing custom recipe), that row is
-     * updated directly. Otherwise, for API-sourced recipes with no known
-     * database id yet, falls back to looking the row up by api_id so
-     * favoriting the same TheMealDB recipe twice doesn't create a
-     * duplicate. Without the recipeId check first, editing a custom
-     * recipe (which has no api_id at all) always fell through to INSERT
-     * and created a new copy on every save.
-     */
     public int saveRecipe(Recipe recipe) throws SQLException {
         Integer existingId = recipe.getRecipeId() > 0
                 ? Integer.valueOf(recipe.getRecipeId())
